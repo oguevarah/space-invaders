@@ -1,0 +1,120 @@
+echo "<!DOCTYPE html>
+<html lang='es'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Space Invaders</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: black;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            display: block;
+            background: black;
+        }
+    </style>
+</head>
+<body>
+    <canvas id='gameCanvas'></canvas>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const playerWidth = 60;
+        const playerHeight = 20;
+        const playerSpeed = 5;
+        const bulletSpeed = 7;
+        const enemyWidth = 40;
+        const enemyHeight = 20;
+        const enemySpeed = 2;
+        const enemyRows = 5;
+        const enemyCols = 10;
+
+        let player = {
+            x: canvas.width / 2 - playerWidth / 2,
+            y: canvas.height - playerHeight - 10,
+            width: playerWidth,
+            height: playerHeight,
+            dx: 0
+        };
+
+        let bullets = [];
+        let enemies = [];
+        let gameOver = false;
+
+        for (let row = 0; row < enemyRows; row++) {
+            for (let col = 0; col < enemyCols; col++) {
+                enemies.push({
+                    x: col * (enemyWidth + 10) + 50,
+                    y: row * (enemyHeight + 10) + 30,
+                    width: enemyWidth,
+                    height: enemyHeight,
+                    dx: enemySpeed
+                });
+            }
+        }
+
+        function drawPlayer() {
+            ctx.fillStyle = 'white';
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+        }
+
+        function drawBullets() {
+            ctx.fillStyle = 'red';
+            bullets.forEach(bullet => {
+                ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
+            });
+        }
+
+        function drawEnemies() {
+            ctx.fillStyle = 'green';
+            enemies.forEach(enemy => {
+                ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+            });
+        }
+
+        function movePlayer() {
+            player.x += player.dx;
+            if (player.x < 0) player.x = 0;
+            if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+        }
+
+        function moveBullets() {
+            bullets.forEach((bullet, index) => {
+                bullet.y -= bulletSpeed;
+                if (bullet.y + bullet.height < 0) bullets.splice(index, 1);
+            });
+        }
+
+        function moveEnemies() {
+            enemies.forEach(enemy => {
+                enemy.x += enemy.dx;
+                if (enemy.x + enemy.width > canvas.width || enemy.x < 0) {
+                    enemy.dx *= -1;
+                    enemy.y += enemyHeight + 10;
+                }
+            });
+        }
+
+        function collisionDetection() {
+            bullets.forEach((bullet, bIndex) => {
+                enemies.forEach((enemy, eIndex) => {
+                    if (bullet.x < enemy.x + enemy.width &&
+                        bullet.x + bullet.width > enemy.x &&
+                        bullet.y < enemy.y + enemy.height &&
+                        bullet.y + bullet.height > enemy.y) {
+                        bullets.splice(bIndex, 1);
+                        enemies.splice(eIndex, 1);
+                    }
+                });
+            });
+
+            enemies.forEach(enemy => {
+               
+
